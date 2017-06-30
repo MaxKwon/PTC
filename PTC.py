@@ -23,7 +23,7 @@ y_dim = len(image_data[0][0]) #set the dimension of the y axis, returns the leng
 num_pixels = x_dim * y_dim #number of total pixels in the image (height * width)  
 
 #choose which data you want (0 = no print, 1 = print)
-selection_array = [1,1,1,1,1,1,1,1] #info, initial, median, diff, SD pixel 2D, Sd pixel 1D, print median, SD per frame
+selection_array = [1,1,1,1,1,1,1,1,1] #info, initial, median, diff, SD pixel 2D, Sd pixel 1D, print median, SD per frame, inputting multiple fits files 
 
 subplot_index = 1; # the position of a graph in the subplot (1 = left), incremented everytime a plot is plotted in the subplot 
 
@@ -41,7 +41,8 @@ def plotInitialImage(data, subplot_pos):
     plt.imshow(data[0], origin='lower') #showing the first frame of the cube and shifting the origin to the bottom left side of the plot 
  
    
-def plotMedian(data, subplot_pos):       
+def plotMedian(data, subplot_pos):     
+    
     med = np.median(data, axis=0) # will take the median of the entire cube with respect to the depth axis and display it as a frame (median frame)
     
     plt.subplot(1, 6, 1*subplot_pos)
@@ -50,6 +51,7 @@ def plotMedian(data, subplot_pos):
     
     
 def plotDiffImage(data, subplot_pos):
+    
     diff_image = data[num_frames-1]-data[0] #takes the difference between the last and the first images in the 3D Array
     
     plt.subplot(1, 6, 1*subplot_pos)
@@ -58,17 +60,11 @@ def plotDiffImage(data, subplot_pos):
 
 
 def plotSDPerPixel2D(data, subplot_pos):
+    
     std_devs = np.zeros(shape=(y_dim, x_dim))
-    stack = np.zeros(shape=(num_frames))
-    
-    #this for loop is really slow and somehow needs to become more efficient 
-    for i in range(0, y_dim):
-        for j in range(0, x_dim):
-           for k in range(0, num_frames):
-                stack[k] = data[k][i][j] #makes a 1D array of the depth of the cube at a certain point on the 2D array 
-                if k==(num_frames-1):
-                   std_devs[i][j] = np.std(stack) #after each 1D array is filled, the SD is taken (once at each pixel going through each frame)
-    
+
+    std_devs = data.std(axis=0)
+
     plt.subplot(1, 6, 1*subplot_pos)
     plt.title("Standard Dev")
     plt.imshow(std_devs, origin='lower')
@@ -77,16 +73,11 @@ def plotSDPerPixel2D(data, subplot_pos):
 
 
 def plotSDPerPixel1D(std_arr, subplot_pos):
+    
     sd_pixel = np.zeros(shape=(num_pixels))
     pixel_index = range(num_pixels) #Ascending array from 0 to number of pixels - 1
     
-    index = 0 #keeps track of the pixel number in the for loop
-    
-    #puts the pixel SD data into a 1d array in order to show it as a line graph where the x axis is the pixel number starting from the top left to tthe bottom right
-    for i in range(0, len(std_arr)): #goes through each row
-        for j in range(0, len(std_arr[0])):#goes through each column
-            sd_pixel[index] = std_arr[i][j]
-            index = index + 1
+    sd_pixel = std_arr.flatten()
             
     plt.subplot(1, 6, 1*subplot_pos)
     plt.title("SD Per Pixel")
@@ -96,7 +87,7 @@ def plotSDPerPixel1D(std_arr, subplot_pos):
 def printMedianSD(std_arr):
     print('Median SD: ', np.median(std_arr)) #the median value of the 2D array full of the SDs for each pixel 
      
-
+#TODO: Change for loop into vectorized calculation
 def plotSDTime(data, subplot_pos): #will plot the median standard deviation over time to see if the noise in the CCD increases with time and exposures done 
     
     mean_data = np.mean(data)
@@ -106,13 +97,12 @@ def plotSDTime(data, subplot_pos): #will plot the median standard deviation over
         med_std_dev_frame[i] = np.median((np.mean((data[i] - mean_data)**2))**(1/2.0)) # SD = (mean((value-mean_of_data)^2))^.5
                      
     frame_index = range(num_frames) #creates an array from 0 to num_frames - 1 to be used as the X axis of the plot 
-                       
-    print(med_std_dev_frame)
-                       
+   
     plt.subplot(1, 6, 1*subplot_pos)
     plt.title("SD Over Time")
     plt.plot(frame_index, med_std_dev_frame)   
     
+#TODO: Change for loop into vectorizec calculation
 def plotPLC(data):
     
     counts = np.zeros(shape=(num_pixels)) #TODO: not sure how this is going to work exactly as of yet 
@@ -166,6 +156,6 @@ if (selection_array[6] == 1):
 if (num_frames > 2 and selection_array[7] == 1): #only want SD over time if it is a data cube with more than 2 frames
     plotSDTime(image_data, subplot_index)
     
-plotPLC(image_data)
+#plotPLC(image_data)
 
 
