@@ -23,9 +23,9 @@ y_dim = len(image_data[0][0]) #set the dimension of the y axis, returns the leng
 num_pixels = x_dim * y_dim #number of total pixels in the image (height * width)  
 
 #choose which data you want (0 = no print, 1 = print)
-selection_array = [1,1,0,0,1,1,1,1] #info, initial, median, diff, SD pixel 2D, Sd pixel 1D, print median, SD per frame
+selection_array = [1,1,0,0,0,1,1,1] #info, initial, median, diff, SD pixel 2D, Sd pixel 1D, print median, SD per frame
 
-subplot_index = 1; # the position of a graph in the subplot (1 = left)
+subplot_index = 1; # the position of a graph in the subplot (1 = left), incremented everytime a plot is plotted in the subplot 
 
 def printInfo(file, data):
     header = fits.getheader(file)
@@ -113,7 +113,9 @@ def plotSDTime(data, subplot_pos): #will plot the median standard deviation over
     plt.title("SD Over Time")
     plt.plot(frame_index, med_std_dev_frame)   
     
-
+#def plotPLC(data, subplot_pos):
+    
+    
 if (selection_array[0] == 1):    
     printInfo(fileIn, image_data)   
     
@@ -133,12 +135,20 @@ if (selection_array[4] == 1):
     sd_plot = plotSDPerPixel2D(image_data, subplot_index)
     subplot_index = subplot_index + 1
 
-if (selection_array[5] == 1 and selection_array[4] == 1):
-    plotSDPerPixel1D(sd_plot, subplot_index)
-    subplot_index = subplot_index + 1
+if (selection_array[5] == 1):
+    if (selection_array[4] == 1):
+        plotSDPerPixel1D(sd_plot, subplot_index)
+        subplot_index = subplot_index + 1
+    
+    else: # error given if the 2D array isnt used and the 1D standard deviation is attempted tobe used
+            print("The 2D standard Deviation must be aquired in order to view the 1D Standard Deviation")
 
-if (selection_array[6] == 1 and selection_array[4] == 1):
-    printMedianSD(sd_plot)
+if (selection_array[6] == 1):
+    if (selection_array[4] == 1):
+        printMedianSD(sd_plot)
+        
+    else: # error given if the 2D array isnt used and the median is attempted to be used
+        print("The 2D standard Deviation must be aquired in order to view the Median Standard Deviation")
 
 if (num_frames > 2 and selection_array[7] == 1): #only want SD over time if it is a data cube with more than 2 frames
     plotSDTime(image_data, subplot_index)
