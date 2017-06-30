@@ -23,7 +23,7 @@ y_dim = len(image_data[0][0]) #set the dimension of the y axis, returns the leng
 num_pixels = x_dim * y_dim #number of total pixels in the image (height * width)  
 
 #choose which data you want (0 = no print, 1 = print)
-selection_array = [1,1,0,0,0,1,1,1] #info, initial, median, diff, SD pixel 2D, Sd pixel 1D, print median, SD per frame
+selection_array = [1,1,1,1,1,1,1,1] #info, initial, median, diff, SD pixel 2D, Sd pixel 1D, print median, SD per frame
 
 subplot_index = 1; # the position of a graph in the subplot (1 = left), incremented everytime a plot is plotted in the subplot 
 
@@ -113,8 +113,21 @@ def plotSDTime(data, subplot_pos): #will plot the median standard deviation over
     plt.title("SD Over Time")
     plt.plot(frame_index, med_std_dev_frame)   
     
-#def plotPLC(data, subplot_pos):
+def plotPLC(data):
     
+    counts = np.zeros(shape=(num_pixels)) #TODO: not sure how this is going to work exactly as of yet 
+    sorted_counts = np.zeros(shape=(num_pixels))
+                     
+    for i in range(0, y_dim):
+       for j in range(0, x_dim):
+          for k in range(0, num_frames):
+               
+              counts[i] = data[k][i][j]
+               
+    sorted_counts = sorted(counts, key=int)
+
+    print(sorted_counts)           
+               
     
 if (selection_array[0] == 1):    
     printInfo(fileIn, image_data)   
@@ -153,5 +166,6 @@ if (selection_array[6] == 1):
 if (num_frames > 2 and selection_array[7] == 1): #only want SD over time if it is a data cube with more than 2 frames
     plotSDTime(image_data, subplot_index)
     
+plotPLC(image_data)
 
 
