@@ -17,22 +17,24 @@ import pylab as py
 #choose which data you want (0 = no print, 1 = print)
 selection_array = [1,1,1,1,1,1,1,1,1] #info, initial, median, diff, SD pixel 2D, Sd pixel 1D, print median, SD per frame, inputting multiple fits files  
 
-#TODO: figure out how to have the program input many files at once (in an array)
-num_files = 1 # 10 is temporary and for testing, not actual, not in use                   
+#user input the number of fits files to be analyzed 
+num_files = 1                   
                   
-files = ["" for x in range(num_files)] # not in use
-image_datas = np.zeros(shape=(num_files)) # not in use
+files = ["" for x in range(num_files)] 
+image_datas = np.zeros(shape=(num_files)) 
+            
+for i in range(0, num_files): #fills an array with all file names that are desired 
+    files[i] = askopenfilename(filetypes=[('.fit','.fits', '.fts')], title='Pick bias')                      
                       
-filesIn = askopenfilename(filetypes=[('.fit','.fits', '.fts')],title='Pick bias')
-image_data = fits.getdata(fileIn) 
+image_data = fits.getdata(files[0]) #the image data for the first file that is input 
 
 num_frames = len(image_data) #find the length of the first dimension of the 3D array which is the number of frames
 x_dim = len(image_data[0]) #set the dimension of the x axis, returns the length of that portion of the array 
 y_dim = len(image_data[0][0]) #set the dimension of the y axis, returns the length of that portion of the array     
 num_pixels = x_dim * y_dim #number of total pixels in the image (height * width)                  
                   
-subplot_index = 1; # the position of a graph in the subplot (1 = left), incremented everytime a plot is plotted in the subplot 
-
+subplot_index = 1; # the position of a graph in the subplot (1 = left), incremented everytime a plot is plotted in the subplot                                                             
+                                                            
 def printInfo(file, data):
     
     header = fits.getheader(file)
