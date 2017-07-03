@@ -15,10 +15,10 @@ from scipy import fftpack
 import pylab as py
 
 #choose which data you want (0 = no print, 1 = print)
-selection_array = [1,1,1,1,1,1,1,1,1] #info, initial, median, diff, SD pixel 2D, Sd pixel 1D, print median, SD per frame, inputting multiple fits files  
+selection_array = [1,1,1,1,1,1,1,1,1] #info, initial, median, diff, SD pixel 2D, Sd pixel 1D, print median, SD per frame, plot PLC
 
 #user input the number of fits files to be analyzed 
-num_files = 1                   
+num_files = 2                   
                   
 files = ["" for x in range(num_files)] 
 image_datas = np.zeros(shape=(num_files)) 
@@ -34,6 +34,9 @@ y_dim = len(image_data[0][0]) #set the dimension of the y axis, returns the leng
 num_pixels = x_dim * y_dim #number of total pixels in the image (height * width)                  
                   
 subplot_index = 1; # the position of a graph in the subplot (1 = left), incremented everytime a plot is plotted in the subplot                                                             
+subplot_rows = 1
+subplot_columns = 7               
+                                                            
                                                             
 def printInfo(file, data):
     
@@ -47,7 +50,7 @@ def printInfo(file, data):
 
 def plotInitialImage(data, subplot_pos):
     
-    plt.subplot(1, 6, 1*subplot_pos)
+    plt.subplot(subplot_rows, subplot_columns, subplot_rows*subplot_pos)
     plt.title("Initial Image")
     plt.imshow(data[0], origin='lower') #showing the first frame of the cube and shifting the origin to the bottom left side of the plot 
     print("Process Complete plotInitialImage")
@@ -56,7 +59,7 @@ def plotMedian(data, subplot_pos):
     
     med = np.median(data, axis=0) # will take the median of the entire cube with respect to the depth axis and display it as a frame (median frame)
     
-    plt.subplot(1, 6, 1*subplot_pos)
+    plt.subplot(subplot_rows, subplot_columns, subplot_rows*subplot_pos)
     plt.title("Median of All")
     plt.imshow(med, origin='lower')
     
@@ -67,7 +70,7 @@ def plotDiffImage(data, subplot_pos):
     
     diff_image = data[num_frames-1]-data[0] #takes the difference between the last and the first images in the 3D Array
     
-    plt.subplot(1, 6, 1*subplot_pos)
+    plt.subplot(subplot_rows, subplot_columns, subplot_rows*subplot_pos)
     plt.title("Difference")
     plt.imshow(diff_image, origin='lower')
     
@@ -80,7 +83,7 @@ def plotSDPerPixel2D(data, subplot_pos):
 
     std_devs = data.std(axis=0)
 
-    plt.subplot(1, 6, 1*subplot_pos)
+    plt.subplot(subplot_rows, subplot_columns, subplot_rows*subplot_pos)
     plt.title("Standard Dev")
     plt.imshow(std_devs, origin='lower')
     
@@ -96,7 +99,7 @@ def plotSDPerPixel1D(std_arr, subplot_pos):
     
     sd_pixel = std_arr.flatten()
             
-    plt.subplot(1, 6, 1*subplot_pos)
+    plt.subplot(subplot_rows, subplot_columns, subplot_rows*subplot_pos)
     plt.title("SD Per Pixel")
     plt.plot(pixel_index, sd_pixel) 
     
@@ -118,7 +121,7 @@ def plotSDTime(data, subplot_pos): #will plot the median standard deviation over
                      
     frame_index = range(num_frames) #creates an array from 0 to num_frames - 1 to be used as the X axis of the plot 
    
-    plt.subplot(1, 6, 1*subplot_pos)
+    plt.subplot(subplot_rows, subplot_columns, subplot_rows*subplot_pos)
     plt.title("SD Over Time")
     plt.plot(frame_index, med_std_dev_frame)   
     
@@ -139,9 +142,11 @@ def plotPLC(files, subplot_pos):
         
         med_std_devs[i] = np.median(data.std(axis=0))
         
-    plt.subplot(1, 7, 1*subplot_pos)
+    plt.subplot(subplot_rows, subplot_columns, subplot_rows*subplot_pos)
     plt.title("PLC")
     plt.plot(med_counts, med_std_devs)
+    
+    print("Process Complete plotPLC")
     
 if (selection_array[0] == 1):    
     printInfo(fileIn, image_data)   
@@ -179,7 +184,10 @@ if (selection_array[6] == 1):
 
 if (num_frames > 2 and selection_array[7] == 1): #only want SD over time if it is a data cube with more than 2 frames
     plotSDTime(image_data, subplot_index)
-    
-#plotPLC(image_data)
+    subplot_index = subplot_index + 1
+
+if (num_frames > 2 and selection_array[8] == 1):
+    plotPLC(files, subplot_index)
+    subplot_index = subplot_index + 1
 
 
