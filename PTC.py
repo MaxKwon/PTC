@@ -18,7 +18,7 @@ import pylab as py
 selection_array = [1,1,1,1,1,1,1,1,1] #info, initial, median, diff, SD pixel 2D, Sd pixel 1D, print median, SD per frame, plot PLC
 
 #user input the number of fits files to be analyzed 
-num_files = 2                   
+num_files = 5                   
                   
 files = ["" for x in range(num_files)] 
 image_datas = np.zeros(shape=(num_files)) 
@@ -46,6 +46,7 @@ def printInfo(file, data):
     print('Type: ', type(data))
     print('Shape', data.shape) #dimensions of array
     print(repr(header))
+    
     print("Process Complete printInfo")
 
 def plotInitialImage(data, subplot_pos):
@@ -53,6 +54,7 @@ def plotInitialImage(data, subplot_pos):
     plt.subplot(subplot_rows, subplot_columns, subplot_rows*subplot_pos)
     plt.title("Initial Image")
     plt.imshow(data[0], origin='lower') #showing the first frame of the cube and shifting the origin to the bottom left side of the plot 
+    
     print("Process Complete plotInitialImage")
    
 def plotMedian(data, subplot_pos):     
@@ -108,6 +110,7 @@ def plotSDPerPixel1D(std_arr, subplot_pos):
 
 def printMedianSD(std_arr):
     print('Median SD: ', np.median(std_arr)) #the median value of the 2D array full of the SDs for each pixel
+    
     print("Process Complete printMedianSD")
      
 #TODO: Change for loop into vectorized calculation
@@ -137,19 +140,19 @@ def plotPLC(files, subplot_pos):
     for i in range (0, len(files)):
         
         data = fits.getdata(files[i])
-        
         med_counts[i] = np.median(np.median(data))
-        
         med_std_devs[i] = np.median(data.std(axis=0))
         
     plt.subplot(subplot_rows, subplot_columns, subplot_rows*subplot_pos)
     plt.title("PLC")
     plt.plot(med_counts, med_std_devs)
+    plt.savefig('PLC.pdf')
+   # plt.plot(np.unique(med_counts), np.poly1d(np.polyfit(med_counts, med_std_devs, 1))(np.unique(med_counts))) #plots linear regression model of the data
     
     print("Process Complete plotPLC")
     
 if (selection_array[0] == 1):    
-    printInfo(fileIn, image_data)   
+    printInfo(files[0], image_data)   
     
 if (selection_array[1] == 1):    
     plotInitialImage(image_data, subplot_index)    
@@ -190,4 +193,4 @@ if (num_frames > 2 and selection_array[8] == 1):
     plotPLC(files, subplot_index)
     subplot_index = subplot_index + 1
 
-
+plt.show()
