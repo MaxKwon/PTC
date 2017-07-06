@@ -11,11 +11,12 @@ import matplotlib.pyplot as plt # plotting package
 import matplotlib.animation as animation
 from astropy.io import fits
 from tkinter.filedialog import askopenfilename
-from scipy import fftpack
+from tkinter import *
+from scipy import fftpack, misc
 import pylab as py
 
 #choose which data you want (0 = no print, 1 = print)
-selection_array = [1,1,1,1,1,1,1,1,1] #info, initial, median, diff, SD pixel 2D, Sd pixel 1D, print median, SD per frame, plot PLC
+selection_array = [1,1,1,1,1,1,1,1,1,1] #info, initial, median, diff, SD pixel 2D, Sd pixel 1D, print median, SD per frame, plot PLC, fourier transform
 
 #user input the number of fits files to be analyzed 
 num_files = 5                   
@@ -35,7 +36,7 @@ num_pixels = x_dim * y_dim #number of total pixels in the image (height * width)
                   
 subplot_index = 1; # the position of a graph in the subplot (1 = left), incremented everytime a plot is plotted in the subplot                                                             
 subplot_rows = 1
-subplot_columns = 7               
+subplot_columns = 8               
                                                             
                                                             
 def printInfo(file, data):
@@ -113,7 +114,6 @@ def printMedianSD(std_arr):
     
     print("Process Complete printMedianSD")
      
-#TODO: Change for loop into vectorized calculation
 def plotSDTime(data, subplot_pos): #will plot the median standard deviation over time to see if the noise in the CCD increases with time and exposures done 
     
     mean_data = np.mean(data)
@@ -130,9 +130,8 @@ def plotSDTime(data, subplot_pos): #will plot the median standard deviation over
     
     print("Process Complete plotSDTime")
     
-#TODO: Change for loop into vectorizec calculation
 #Take many data cubes and plot the median counts of each cube by the median SD of the cube 
-def plotPLC(files, subplot_pos):
+def plotPTC(files, subplot_pos):
     
     med_counts = np.zeros(shape=(num_files))
     med_std_devs = np.zeros(shape=(num_files))
@@ -144,13 +143,38 @@ def plotPLC(files, subplot_pos):
         med_std_devs[i] = np.median(data.std(axis=0))
         
     plt.subplot(subplot_rows, subplot_columns, subplot_rows*subplot_pos)
-    plt.title("PLC")
+
+#    plt.figure(figsize=(6,6)) # Making it bigger removes it from the subplot for some reason
+    plt.title("PTC")
     plt.plot(med_counts, med_std_devs)
-    plt.savefig('PLC.pdf')
-   # plt.plot(np.unique(med_counts), np.poly1d(np.polyfit(med_counts, med_std_devs, 1))(np.unique(med_counts))) #plots linear regression model of the data
+    plt.plot(np.unique(med_counts), np.poly1d(np.polyfit(med_counts, med_std_devs, 1))(np.unique(med_counts))) #plots linear regression model of the data
     
-    print("Process Complete plotPLC")
+    slope, y_intercept = np.polyfit(med_counts, med_std_devs, 1) #returns the coeeficients of the polynomial that fits the curve, ours is of order 1 so only slope and y intercept (mx+b)
+                                         
+    print('Gain', slope)
+    print('Y Intercept', y_intercept)
     
+    print("Process Complete plotPTC")
+    
+def plotFourierTransform(data, subplot_pos):
+   # show the power spectrum
+    plt.subplot(subplot_rows, subplot_columns, subplot_rows*subplot_pos)
+    plt.title("ps")
+    # Take the fourier transform of the image.
+    file_F1 = fftpack.fft2(data)
+    # Now shift the quadrants around so that low spatial frequencies are in
+    # the center of the 2D fourier transformed image.
+    file_F2 = fftpack.fftshift(file_F1)
+    # Calculate a 2D power spectrum
+    file_psd2D = np.abs(file_F2) ** 2
+    py.imshow(np.log10(file_psd2D), origin='lower')
+    plt.savefig('PTC.pdf')
+    
+    print("Process Complete plotFourierTransform")
+    
+#TODO: add in the animation/movie of the fits file
+#TODO: add in the fourier transform of the images
+
 if (selection_array[0] == 1):    
     printInfo(files[0], image_data)   
     
@@ -176,7 +200,7 @@ if (selection_array[5] == 1):
         subplot_index = subplot_index + 1
     
     else: # error given if the 2D array isnt used and the 1D standard deviation is attempted tobe used
-            print("The 2D standard Deviation must be aquired in order to view the 1D Standard Deviation")
+        print("The 2D standard Deviation must be aquired in order to view the 1D Standard Deviation")
 
 if (selection_array[6] == 1):
     if (selection_array[4] == 1):
@@ -190,7 +214,11 @@ if (num_frames > 2 and selection_array[7] == 1): #only want SD over time if it i
     subplot_index = subplot_index + 1
 
 if (num_frames > 2 and selection_array[8] == 1):
-    plotPLC(files, subplot_index)
+    plotPTC(files, subplot_index)
+    subplot_index = subplot_index + 1
+    
+if (selection_array[9] == 1):
+    plotFourierTransform(np.require(image_data[0], dtype=np.float32), subplot_index)
     subplot_index = subplot_index + 1
 
 plt.show()
