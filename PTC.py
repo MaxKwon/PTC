@@ -157,23 +157,22 @@ def plotPTC(files, subplot_pos):
     print("Process Complete plotPTC")
     
 def plotFourierTransform(data, subplot_pos):
-   # show the power spectrum
-    plt.subplot(subplot_rows, subplot_columns, subplot_rows*subplot_pos)
-    plt.title("ps")
-    # Take the fourier transform of the image.
-    file_F1 = fftpack.fft2(data)
-    # Now shift the quadrants around so that low spatial frequencies are in
-    # the center of the 2D fourier transformed image.
-    file_F2 = fftpack.fftshift(file_F1)
-    # Calculate a 2D power spectrum
-    file_psd2D = np.abs(file_F2) ** 2
+
+    plt.subplot(subplot_rows, subplot_columns, subplot_rows*subplot_pos)  # show the power spectrum
+    plt.title("PS")
+   
+    file_F1 = fftpack.fft2(data)  # Take the fourier transform of the image.
+
+    file_F2 = fftpack.fftshift(file_F1) # Now shift the quadrants around so that low spatial frequencies are in the center of the 2D fourier transformed image.
+    
+    file_psd2D = np.abs(file_F2) ** 2# Calculate a 2D power spectrum
     py.imshow(np.log10(file_psd2D), origin='lower')
-    plt.savefig('PTC.pdf')
+    
+    plt.savefig('PTC.pdf') #saves the subplot into a pdf in the folder where the program is 
     
     print("Process Complete plotFourierTransform")
-    
+
 #TODO: add in the animation/movie of the fits file
-#TODO: add in the fourier transform of the images
 
 if (selection_array[0] == 1):    
     printInfo(files[0], image_data)   
@@ -218,7 +217,7 @@ if (num_frames > 2 and selection_array[8] == 1):
     subplot_index = subplot_index + 1
     
 if (selection_array[9] == 1):
-    plotFourierTransform(np.require(image_data[0], dtype=np.float32), subplot_index)
+    plotFourierTransform(np.require(image_data[0], dtype=np.float32), subplot_index) #image_data[0] needs to be converted from an endian type, the encapsulating method does that 
     subplot_index = subplot_index + 1
 
 plt.show()
