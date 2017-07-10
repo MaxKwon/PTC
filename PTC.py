@@ -16,13 +16,15 @@ from scipy import fftpack, misc
 import pylab as py
 
 #choose which data you want (0 = no print, 1 = print)
-selection_array = [1,1,1,1,1,1,1,1,1,1] #info, initial, median, diff, SD pixel 2D, Sd pixel 1D, print median, SD per frame, plot PLC, fourier transform
+#Params:
+#info, initial, median, diff, SD pixel 2D, Sd pixel 1D, print median, SD per frame, plot PLC, fourier transform
+selection_array = [1,1,1,1,1,1,1,1,1,1] # 0 = no, 1 = add
 
 #user input the number of fits files to be analyzed 
 num_files = 5                   
                   
-files = ["" for x in range(num_files)] 
-image_datas = np.zeros(shape=(num_files)) 
+files = ["" for x in range(num_files)]  #creates an array for the number of fits file
+image_datas = np.zeros(shape=(num_files)) #array of the image data
             
 for i in range(0, num_files): #fills an array with all file names that are desired 
     files[i] = askopenfilename(filetypes=[('.fit','.fits', '.fts')], title='Pick bias')                      
@@ -35,8 +37,8 @@ y_dim = len(image_data[0][0]) #set the dimension of the y axis, returns the leng
 num_pixels = x_dim * y_dim #number of total pixels in the image (height * width)                  
                   
 subplot_index = 1; # the position of a graph in the subplot (1 = left), incremented everytime a plot is plotted in the subplot                                                             
-subplot_rows = 1
-subplot_columns = 8               
+subplot_rows = 1 # number of rows in the subplot
+subplot_columns = 8 # number of columns in subplot                
                                                             
                                                             
 def printInfo(file, data):
@@ -48,7 +50,7 @@ def printInfo(file, data):
     print('Shape', data.shape) #dimensions of array
     print(repr(header))
     
-    print("Process Complete printInfo")
+    #print("Process Complete printInfo")
 
 def plotInitialImage(data, subplot_pos):
     
@@ -56,7 +58,7 @@ def plotInitialImage(data, subplot_pos):
     plt.title("Initial Image")
     plt.imshow(data[0], origin='lower') #showing the first frame of the cube and shifting the origin to the bottom left side of the plot 
     
-    print("Process Complete plotInitialImage")
+    #print("Process Complete plotInitialImage")
    
 def plotMedian(data, subplot_pos):     
     
@@ -66,7 +68,7 @@ def plotMedian(data, subplot_pos):
     plt.title("Median of All")
     plt.imshow(med, origin='lower')
     
-    print("Process Complete plotMedian")
+    #print("Process Complete plotMedian")
     
     
 def plotDiffImage(data, subplot_pos):
@@ -77,7 +79,7 @@ def plotDiffImage(data, subplot_pos):
     plt.title("Difference")
     plt.imshow(diff_image, origin='lower')
     
-    print("Process Complete plotDiffImage")
+    #print("Process Complete plotDiffImage")
 
 
 def plotSDPerPixel2D(data, subplot_pos):
@@ -90,7 +92,7 @@ def plotSDPerPixel2D(data, subplot_pos):
     plt.title("Standard Dev")
     plt.imshow(std_devs, origin='lower')
     
-    print("Process Complete plotSDPerPixel2D")
+    #print("Process Complete plotSDPerPixel2D")
     
     return std_devs
 
@@ -106,13 +108,13 @@ def plotSDPerPixel1D(std_arr, subplot_pos):
     plt.title("SD Per Pixel")
     plt.plot(pixel_index, sd_pixel) 
     
-    print("Process Complete plotSDPerPixel1D")
+    #print("Process Complete plotSDPerPixel1D")
 
 
 def printMedianSD(std_arr):
     print('Median SD: ', np.median(std_arr)) #the median value of the 2D array full of the SDs for each pixel
     
-    print("Process Complete printMedianSD")
+    #print("Process Complete printMedianSD")
      
 def plotSDTime(data, subplot_pos): #will plot the median standard deviation over time to see if the noise in the CCD increases with time and exposures done 
     
@@ -128,7 +130,7 @@ def plotSDTime(data, subplot_pos): #will plot the median standard deviation over
     plt.title("SD Over Time")
     plt.plot(frame_index, med_std_dev_frame)   
     
-    print("Process Complete plotSDTime")
+    #print("Process Complete plotSDTime")
     
 #Take many data cubes and plot the median counts of each cube by the median SD of the cube 
 def plotPTC(files, subplot_pos):
@@ -154,7 +156,7 @@ def plotPTC(files, subplot_pos):
     print('Gain', slope)
     print('Y Intercept', y_intercept)
     
-    print("Process Complete plotPTC")
+   # print("Process Complete plotPTC")
     
 def plotFourierTransform(data, subplot_pos):
 
@@ -170,7 +172,7 @@ def plotFourierTransform(data, subplot_pos):
     
     plt.savefig('PTC.pdf') #saves the subplot into a pdf in the folder where the program is 
     
-    print("Process Complete plotFourierTransform")
+  #  print("Process Complete plotFourierTransform")
 
 #TODO: add in the animation/movie of the fits file
 
