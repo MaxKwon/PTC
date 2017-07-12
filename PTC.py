@@ -36,7 +36,7 @@ x_dim = len(image_data[0]) #set the dimension of the x axis, returns the length 
 y_dim = len(image_data[0][0]) #set the dimension of the y axis, returns the length of that portion of the array     
 num_pixels = x_dim * y_dim #number of total pixels in the image (height * width)                  
                   
-subplot_index = 1; # the position of a graph in the subplot (1 = left), incremented everytime a plot is plotted in the subplot                                                             
+subplot_index = 1; # the position of a graph in the subplot (1 = most left), incremented everytime a plot is plotted in the subplot                                                             
 subplot_rows = 1 # number of rows in the subplot
 subplot_columns = 8 # number of columns in subplot                
                                                             
@@ -92,7 +92,7 @@ def plotSDPerPixel2D(data, subplot_pos):
     plt.title("Standard Dev")
     plt.imshow(std_devs, origin='lower')
     
-    #print("Process Complete plotSDPerPixel2D")
+   # print("Process Complete plotSDPerPixel2D")
     
     return std_devs
 
@@ -155,6 +155,8 @@ def plotPTC(files, subplot_pos):
                                          
     print('Gain', slope)
     print('Y Intercept', y_intercept)
+    print('counts', med_counts)
+    print('std', med_std_devs)
     
    # print("Process Complete plotPTC")
     
@@ -172,9 +174,17 @@ def plotFourierTransform(data, subplot_pos):
     
     plt.savefig('PTC.pdf') #saves the subplot into a pdf in the folder where the program is 
     
-  #  print("Process Complete plotFourierTransform")
+    #print("Process Complete plotFourierTransform")
+    
+def notGoodNumber(arr):
+    
+    for i in range(0, len(arr)):
+        if ( arr[i] != 0 or arr[i] != 1):    
+            return True
+    return False
 
-#TODO: add in the animation/movie of the fits file
+if (notGoodNumber(selection_array)):
+    print("ONLY USE 1 OR 0 FOR SELECTION ARRAY")
 
 if (selection_array[0] == 1):    
     printInfo(files[0], image_data)   
