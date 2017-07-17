@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Jun 21 11:29:07 2017
-
 @author: Max K. Kwon 
 """
 
@@ -38,7 +37,10 @@ num_pixels = x_dim * y_dim #number of total pixels in the image (height * width)
                   
 subplot_index = 1; # the position of a graph in the subplot (1 = most left), incremented everytime a plot is plotted in the subplot                                                             
 subplot_rows = 1 # number of rows in the subplot
-subplot_columns = 8 # number of columns in subplot                
+subplot_columns = 8 # number of columns in subplot 
+
+linear_fit_start = 1 #inclusive 
+linear_fit_stop = 4 #this value is exclusive               
                                                             
                                                             
 def printInfo(file, data):
@@ -92,7 +94,7 @@ def plotSDPerPixel2D(data, subplot_pos):
     plt.title("Standard Dev")
     plt.imshow(std_devs, origin='lower')
     
-   # print("Process Complete plotSDPerPixel2D")
+    #print("Process Complete plotSDPerPixel2D")
     
     return std_devs
 
@@ -114,7 +116,7 @@ def plotSDPerPixel1D(std_arr, subplot_pos):
 def printMedianSD(std_arr):
     print('Median SD: ', np.median(std_arr)) #the median value of the 2D array full of the SDs for each pixel
     
-    #print("Process Complete printMedianSD")
+   #print("Process Complete printMedianSD")
      
 def plotSDTime(data, subplot_pos): #will plot the median standard deviation over time to see if the noise in the CCD increases with time and exposures done 
     
@@ -130,7 +132,7 @@ def plotSDTime(data, subplot_pos): #will plot the median standard deviation over
     plt.title("SD Over Time")
     plt.plot(frame_index, med_std_dev_frame)   
     
-    #print("Process Complete plotSDTime")
+   #print("Process Complete plotSDTime")
     
 #Take many data cubes and plot the median counts of each cube by the median SD of the cube 
 def plotPTC(files, subplot_pos):
@@ -145,20 +147,34 @@ def plotPTC(files, subplot_pos):
         med_std_devs[i] = np.median(data.std(axis=0))
         
     plt.subplot(subplot_rows, subplot_columns, subplot_rows*subplot_pos)
-
-#    plt.figure(figsize=(6,6)) # Making it bigger removes it from the subplot for some reason
-    plt.title("PTC")
-    plt.plot(med_counts, med_std_devs)
-    plt.plot(np.unique(med_counts), np.poly1d(np.polyfit(med_counts, med_std_devs, 1))(np.unique(med_counts))) #plots linear regression model of the data
     
-    slope, y_intercept = np.polyfit(med_counts, med_std_devs, 1) #returns the coeeficients of the polynomial that fits the curve, ours is of order 1 so only slope and y intercept (mx+b)
+    med_std_devs_sorted = [x for y, x in sorted(zip(med_counts, med_std_devs))] #sorts the standard deviation array in the same order as the median count array
+    med_counts.sort()
+    
+    linear_fit_counts = np.zeros(shape=(linear_fit_stop - linear_fit_start))
+    linear_fit_std_devs = np.zeros(shape=(linear_fit_stop - linear_fit_start))
+    
+    index = 0
+    
+    for i in range(linear_fit_start, linear_fit_stop):
+        
+        linear_fit_counts[index] = med_counts[i]
+        linear_fit_std_devs[index] = med_std_devs_sorted[i]
+
+        index = index + 1
+
+    plt.title("PTC")
+    plt.plot(med_counts, med_std_devs_sorted)
+    plt.plot(np.unique(linear_fit_counts), np.poly1d(np.polyfit(linear_fit_counts, linear_fit_std_devs, 1))(np.unique(linear_fit_counts))) #plots linear regression model of the data
+    
+    slope, y_intercept = np.polyfit(linear_fit_counts, linear_fit_std_devs, 1) #returns the coeeficients of the polynomial that fits the curve, ours is of order 1 so only slope and y intercept (mx+b)
                                          
     print('Gain', slope)
     print('Y Intercept', y_intercept)
     print('counts', med_counts)
-    print('std', med_std_devs)
+    print('std', med_std_devs_sorted)
     
-   # print("Process Complete plotPTC")
+   #print("Process Complete plotPTC")
     
 def plotFourierTransform(data, subplot_pos):
 
@@ -174,7 +190,7 @@ def plotFourierTransform(data, subplot_pos):
     
     plt.savefig('PTC.pdf') #saves the subplot into a pdf in the folder where the program is 
     
-    #print("Process Complete plotFourierTransform")
+   #print("Process Complete plotFourierTransform")
     
 def notGoodNumber(arr):
     
@@ -231,5 +247,6 @@ if (num_frames > 2 and selection_array[8] == 1):
 if (selection_array[9] == 1):
     plotFourierTransform(np.require(image_data[0], dtype=np.float32), subplot_index) #image_data[0] needs to be converted from an endian type, the encapsulating method does that 
     subplot_index = subplot_index + 1
+
 
 plt.show()
