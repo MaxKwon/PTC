@@ -27,9 +27,9 @@ image_datas = np.zeros(shape=(num_files)) #array of the image data
             
 for i in range(0, num_files): #fills an array with all file names that are desired 
     files[i] = askopenfilename(filetypes=[('.fit','.fits', '.fts')], title='Pick bias')                      
-                      
+    
 image_data = fits.getdata(files[0]) #the image data for the first file that is input 
-
+                         
 num_frames = len(image_data) #find the length of the first dimension of the 3D array which is the number of frames
 x_dim = len(image_data[0]) #set the dimension of the x axis, returns the length of that portion of the array 
 y_dim = len(image_data[0][0]) #set the dimension of the y axis, returns the length of that portion of the array     
@@ -189,6 +189,7 @@ def plotFourierTransform(data, subplot_pos):
     py.imshow(np.log10(file_psd2D), origin='lower')
     
     plt.savefig('PTC.pdf') #saves the subplot into a pdf in the folder where the program is 
+    plt.savefig('PTC.jpg') #saves the subplot into a jpg in the folder where the program is 
     
    #print("Process Complete plotFourierTransform")
     
@@ -247,6 +248,5 @@ if (num_frames > 2 and selection_array[8] == 1):
 if (selection_array[9] == 1):
     plotFourierTransform(np.require(image_data[0], dtype=np.float32), subplot_index) #image_data[0] needs to be converted from an endian type, the encapsulating method does that 
     subplot_index = subplot_index + 1
-
 
 plt.show()
