@@ -20,7 +20,7 @@ import pylab as py
 selection_array = [1,1,1,1,1,1,1,1,1,1] # 0 = no, 1 = add
 
 #user input the number of fits files to be analyzed 
-num_files = 5                   
+num_files = 3                
                   
 files = ["" for x in range(num_files)]  #creates an array for the number of fits file
 
@@ -44,7 +44,11 @@ subplot_columns = 8 # number of columns in subplot
 
 #############################################
 linear_fit_start = 0 #inclusive starts at 0
-linear_fit_stop = 5 #this value is exclusive       
+linear_fit_stop = 5 #this value is exclusive     
+
+#Protects the code if the upper bound is longer than the array
+if (linear_fit_stop > len(files)):
+    linear_fit_stop = len(files)  
 
 ####some stuff to make the plots bigger####
 plt.close('all')
